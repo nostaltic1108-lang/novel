@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Writing Room</title>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;700&family=Noto+Sans+JP:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
@@ -736,13 +736,14 @@ document.querySelector('.hero-label').textContent = SITE_LABEL;
 document.querySelector('.site-footer').innerHTML = `© ${SITE_NAME}`;
 document.title = SITE_NAME;
 
-// ─── LINK CARD RENDERER ───────────────────
-const renderer = new marked.Renderer();
-const defaultCode = renderer.code.bind(renderer);
-renderer.code = function({ text, lang }) {
-  if (lang === 'linkcard') {
+// ─── LINK CARD: post-process after marked ──
+function renderLinkCards(html) {
+  // Match <code class="language-linkcard">...</code> blocks wrapped in <pre>
+  return html.replace(/<pre><code class="language-linkcard">([\s\S]*?)<\/code><\/pre>/g, function(_, inner) {
+    // Decode HTML entities
+    const text = inner.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
     const props = {};
-    text.split('\n').forEach(line => {
+    text.split('\n').forEach(function(line) {
       const m = line.match(/^(\w+):\s*(.+)$/);
       if (m) props[m[1]] = m[2].trim();
     });
@@ -750,24 +751,35 @@ renderer.code = function({ text, lang }) {
     const title = props.title || url;
     const desc = props.description || '';
     const image = props.image || '';
-    let domain = '';
+    var domain = '';
     try { domain = new URL(url).hostname; } catch(e) { domain = url; }
-    return `
-      <a class="link-card" href="${url}" target="_blank" rel="noopener noreferrer">
-        <div class="link-card-body">
-          <div class="link-card-title">${title}</div>
-          ${desc ? `<div class="link-card-desc">${desc}</div>` : ''}
-          <div class="link-card-url">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-.025 9.45a.75.75 0 01-1.06-1.06l-1.25 1.25a2 2 0 01-2.83-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25z"/></svg>
-            ${domain}
-          </div>
-        </div>
-        ${image ? `<img class="link-card-thumb" src="${image}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}
-      </a>`;
+    return '<a class="link-card" href="' + url + '" target="_blank" rel="noopener noreferrer">' +
+      '<div class="link-card-body">' +
+        '<div class="link-card-title">' + title + '</div>' +
+        (desc ? '<div class="link-card-desc">' + desc + '</div>' : '') +
+        '<div class="link-card-url">' +
+          '<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-.025 9.45a.75.75 0 01-1.06-1.06l-1.25 1.25a2 2 0 01-2.83-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25z"/></svg>' +
+          domain +
+        '</div>' +
+      '</div>' +
+      (image ? '<img class="link-card-thumb" src="' + image + '" alt="" loading="lazy" onerror="this.style.display=\'none\'">' : '') +
+    '</a>';
+  });
+}
+
+function parseMd(md) {
+  if (typeof marked !== 'undefined') {
+    return renderLinkCards(marked.parse(md));
   }
-  return defaultCode({ text, lang });
-};
-marked.setOptions({ renderer });
+  // Minimal fallback if marked didn't load
+  return md
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n{2,}/g, '</p><p>')
+    .replace(/^/, '<p>').replace(/$/, '</p>');
+}
 
 // ─── DEMO DATA (fallback for preview) ─────
 const DEMO_ARTICLES = [
@@ -1010,11 +1022,10 @@ async function renderArticle(file) {
     const res = await fetch(file);
     if (!res.ok) throw new Error(res.status);
     const md = await res.text();
-    content.innerHTML = marked.parse(md);
+    content.innerHTML = parseMd(md);
   } catch(e) {
-    // Show excerpt as fallback when .md file can't be loaded
     const fallbackMd = `# ${a.title}\n\n${a.excerpt || ''}\n\n---\n\n*（プレビュー表示です。デプロイ後は記事全文が表示されます。）*`;
-    content.innerHTML = marked.parse(fallbackMd);
+    content.innerHTML = parseMd(fallbackMd);
   }
 }
 
