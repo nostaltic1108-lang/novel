@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Writing Room</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;700&family=Noto+Sans+JP:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #F7F8FA;
+  --bg-white: #FFFFFF;
+  --text: #313744;
+  --text-sub: #6E7586;
+  --text-light: #A0A7B8;
+  --accent: #8099B3;
+  --accent-soft: #E8EEF4;
+  --accent-deep: #5C7A96;
+  --border: #DDE1E8;
+  --radius: 8px;
+  --font-body: 'Noto Sans JP', sans-serif;
+  --font-display: 'Zen Old Mincho', serif;
+  --font-accent: 'Cormorant Garamond', serif;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  font-size: 15px;
+  font-weight: 300;
+  min-height: 100vh;
+}
+
+/* ── Utilities ── */
+.container { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+.fade-in { animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ══════════════════════════════════════
+   HEADER - thin fixed bar
+   ══════════════════════════════════════ */
+.site-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 200;
+  background: rgba(247,248,250,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  transition: transform 0.3s;
+}
+.header-bar {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-logo {
+  font-family: var(--font-accent);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+.header-logo:hover { color: var(--accent-deep); }
+.header-links {
+  display: flex;
+  gap: 4px;
+}
+.header-links button {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--text-sub);
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.02em;
+}
+.header-links button:hover { color: var(--accent-deep); background: var(--accent-soft); }
+.header-links button.active { color: var(--accent-deep); background: var(--accent-soft); font-weight: 500; }
+
+/* ══════════════════════════════════════
+   TOP PAGE - Hero
+   ══════════════════════════════════════ */
+#topPage {
+  padding-top: 52px;
+}
+.hero {
+  padding: 100px 20px 80px;
+  text-align: center;
+  position: relative;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 320px;
+  background: linear-gradient(170deg, var(--accent-soft) 0%, var(--bg) 100%);
+  z-index: -1;
+}
+.hero-label {
+  font-family: var(--font-accent);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  margin-bottom: 20px;
+}
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 5vw, 40px);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 16px;
+  letter-spacing: 0.04em;
+}
+.hero-desc {
+  font-size: 14px;
+  color: var(--text-sub);
+  max-width: 420px;
+  margin: 0 auto 40px;
+  line-height: 1.9;
+}
+.hero-enter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--bg-white);
+  background: var(--accent);
+  border: none;
+  padding: 11px 28px;
+  border-radius: 24px;
+  cursor: pointer;
+  transition: all 0.25s;
+  letter-spacing: 0.04em;
+}
+.hero-enter:hover { background: var(--accent-deep); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(92,122,150,0.2); }
+.hero-enter svg { transition: transform 0.2s; }
+.hero-enter:hover svg { transform: translateX(3px); }
+
+/* ── Top: Latest Articles ── */
+.top-section {
+  padding: 0 20px 80px;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.section-more {
+  font-size: 12px;
+  color: var(--accent);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  transition: color 0.2s;
+}
+.section-more:hover { color: var(--accent-deep); }
+
+.latest-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+.latest-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.latest-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px;
+  height: 0;
+  background: var(--accent);
+  transition: height 0.3s;
+}
+.latest-card:hover::before { height: 100%; }
+.latest-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(100,120,150,0.08);
+  transform: translateY(-2px);
+}
+.latest-card .lc-cat {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--accent-deep);
+  background: var(--accent-soft);
+  padding: 3px 8px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-bottom: 10px;
+  letter-spacing: 0.04em;
+}
+.latest-card .lc-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.latest-card .lc-excerpt {
+  font-size: 12.5px;
+  color: var(--text-sub);
+  line-height: 1.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.latest-card .lc-date {
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: 12px;
+}
+
+/* ── Top: Category Blocks ── */
+.cat-blocks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 60px;
+}
+.cat-block {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-align: center;
+}
+.cat-block:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(100,120,150,0.08);
+}
+.cat-block-icon {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+.cat-block-name {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.cat-block-count {
+  font-size: 12px;
+  color: var(--text-light);
+}
+.cat-block-subs {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.cat-block-subs span {
+  font-size: 11px;
+  color: var(--text-sub);
+  background: var(--bg);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* ══════════════════════════════════════
+   ARTICLES PAGE
+   ══════════════════════════════════════ */
+#articlesPage {
+  display: none;
+  padding-top: 52px;
+}
+
+/* ── Tab Filter ── */
+.filter-bar {
+  position: sticky;
+  top: 52px;
+  z-index: 100;
+  background: rgba(247,248,250,0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+}
+.filter-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filter-inner::-webkit-scrollbar { display: none; }
+.filter-tab {
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--text-sub);
+  background: none;
+  border: 1px solid transparent;
+  padding: 6px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.filter-tab:hover { border-color: var(--border); color: var(--text); }
+.filter-tab.active {
+  background: var(--accent-soft);
+  border-color: var(--accent-soft);
+  color: var(--accent-deep);
+  font-weight: 500;
+}
+
+/* ── Article List ── */
+.articles-header {
+  padding: 36px 0 4px;
+}
+.articles-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.articles-count {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+
+.article-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.article-item:hover { padding-left: 6px; }
+.article-item:hover .ai-title { color: var(--accent-deep); }
+.ai-date {
+  font-family: var(--font-accent);
+  font-size: 13px;
+  color: var(--text-light);
+  min-width: 48px;
+  padding-top: 2px;
+  line-height: 1;
+}
+.ai-date .day { font-size: 22px; font-weight: 600; color: var(--text-sub); display: block; }
+.ai-date .month { font-size: 11px; display: block; margin-top: 2px; }
+.ai-body { flex: 1; min-width: 0; }
+.ai-cat {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--accent-deep);
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.ai-title {
+  font-family: var(--font-display);
+  font-size: 16.5px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin-bottom: 4px;
+  transition: color 0.2s;
+}
+.ai-excerpt {
+  font-size: 13px;
+  color: var(--text-sub);
+  line-height: 1.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════
+   ARTICLE VIEW
+   ══════════════════════════════════════ */
+#articlePage {
+  display: none;
+  padding-top: 52px;
+}
+.article-top {
+  padding: 48px 0 36px;
+  text-align: center;
+  position: relative;
+}
+.article-top::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 200px;
+  background: linear-gradient(180deg, var(--accent-soft) 0%, var(--bg) 100%);
+  z-index: -1;
+}
+.article-back {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-light);
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
+}
+.article-back:hover { color: var(--accent-deep); }
+.article-top .at-cat {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent-deep);
+  background: var(--accent-soft);
+  padding: 4px 12px;
+  border-radius: 12px;
+  display: inline-block;
+  margin-bottom: 16px;
+  letter-spacing: 0.04em;
+}
+.article-top h1 {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 4vw, 30px);
+  font-weight: 700;
+  line-height: 1.55;
+  margin-bottom: 12px;
+  letter-spacing: 0.03em;
+}
+.article-top .at-date {
+  font-family: var(--font-accent);
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-light);
+}
+
+.article-content {
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+  font-family: var(--font-display), serif;
+  font-size: 15.5px;
+  line-height: 2.1;
+  font-weight: 400;
+}
+.article-content h2 {
+  font-size: 19px;
+  margin: 44px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.04em;
+}
+.article-content h3 {
+  font-size: 16px;
+  margin: 30px 0 12px;
+}
+.article-content p { margin-bottom: 20px; }
+.article-content img {
+  max-width: 100%;
+  border-radius: var(--radius);
+  margin: 24px 0;
+  box-shadow: 0 2px 12px rgba(100,120,150,0.1);
+}
+.article-content blockquote {
+  border-left: 2px solid var(--accent);
+  padding: 6px 20px;
+  margin: 24px 0;
+  color: var(--text-sub);
+  background: var(--accent-soft);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-style: italic;
+}
+.article-content code {
+  background: #ECEFF4;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 13.5px;
+}
+.article-content pre {
+  background: #303644;
+  color: #D4D8E0;
+  padding: 18px 22px;
+  border-radius: var(--radius);
+  overflow-x: auto;
+  margin: 24px 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.article-content pre code { background: none; padding: 0; color: inherit; }
+.article-content hr {
+  border: none;
+  text-align: center;
+  margin: 36px 0;
+}
+.article-content hr::before {
+  content: '· · ·';
+  color: var(--accent);
+  font-size: 18px;
+  letter-spacing: 0.4em;
+  opacity: 0.6;
+}
+
+/* ── Link Card ── */
+.link-card {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 24px 0;
+  text-decoration: none;
+  color: inherit;
+  background: var(--bg-white);
+  transition: all 0.25s;
+  max-height: 140px;
+}
+.link-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(100,120,150,0.08);
+  transform: translateY(-1px);
+}
+.link-card-body {
+  flex: 1;
+  padding: 16px 20px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.link-card-title {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.link-card-desc {
+  font-size: 12px;
+  color: var(--text-sub);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.link-card-url {
+  font-size: 11px;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.link-card-url svg {
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+.link-card-thumb {
+  width: 140px;
+  min-width: 140px;
+  object-fit: cover;
+  border-left: 1px solid var(--border);
+}
+@media (max-width: 600px) {
+  .link-card-thumb { width: 100px; min-width: 100px; }
+}
+
+/* ── Empty ── */
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-light);
+  font-size: 13px;
+}
+
+/* ── Footer ── */
+.site-footer {
+  border-top: 1px solid var(--border);
+  text-align: center;
+  padding: 28px 20px;
+  font-family: var(--font-accent);
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-light);
+  letter-spacing: 0.05em;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .hero { padding: 72px 20px 56px; }
+  .cat-blocks { grid-template-columns: 1fr; }
+  .latest-grid { grid-template-columns: 1fr; }
+  .ai-date { display: none; }
+  .header-links { gap: 0; }
+  .header-links button { padding: 6px 8px; font-size: 11.5px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="header-bar">
+    <a class="header-logo" onclick="goTop()">My Writing Room</a>
+    <nav class="header-links" id="headerNav"></nav>
+  </div>
+</header>
+
+<!-- ══ TOP PAGE ══ -->
+<div id="topPage">
+  <div class="hero">
+    <div class="hero-label">— words, stories, thoughts —</div>
+    <h1 class="hero-title">My Writing Room</h1>
+    <p class="hero-desc">小説やエッセイ、日々のことを<br>すこしずつ書きためています。</p>
+    <button class="hero-enter" onclick="goArticles()">
+      記事を読む
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <div class="top-section">
+    <!-- Latest -->
+    <div class="section-head">
+      <div class="section-title">最新の記事</div>
+      <button class="section-more" onclick="goArticles()">すべて見る →</button>
+    </div>
+    <div class="latest-grid" id="latestGrid"></div>
+  </div>
+
+  <div class="top-section">
+    <div class="section-head">
+      <div class="section-title">カテゴリ</div>
+    </div>
+    <div class="cat-blocks" id="catBlocks"></div>
+  </div>
+</div>
+
+<!-- ══ ARTICLES PAGE ══ -->
+<div id="articlesPage">
+  <div class="filter-bar">
+    <div class="filter-inner" id="filterTabs"></div>
+  </div>
+  <div class="container">
+    <div class="articles-header">
+      <div class="articles-title" id="articlesTitle">すべての記事</div>
+      <div class="articles-count" id="articlesCount"></div>
+    </div>
+    <div id="articlesList"></div>
+  </div>
+</div>
+
+<!-- ══ ARTICLE PAGE ══ -->
+<div id="articlePage">
+  <div class="container">
+    <div class="article-top" id="articleTop"></div>
+  </div>
+  <div class="article-content" id="articleContent"></div>
+</div>
+
+<footer class="site-footer">© My Writing Room</footer>
+
+<script>
+// ─── CONFIG ───────────────────────────────
+const SITE_NAME = 'My Writing Room';
+const SITE_DESC = '小説やエッセイ、日々のことを<br>すこしずつ書きためています。';
+const SITE_LABEL = '— words, stories, thoughts —';
+
+const CATEGORY_LABELS = {
+  'novel': '小説',
+  'blog':  'ブログ',
+};
+const SUBCATEGORY_LABELS = {
+  'fantasy': 'ファンタジー',
+  'sf':      'SF',
+  'daily':   '日常',
+  'tech':    '技術メモ',
+};
+const CATEGORY_ICONS = {
+  'novel': '✦',
+  'blog':  '◎',
+};
+
+// ─── STATE ────────────────────────────────
+let articles = [];
+let currentFilter = null;
+let currentPage = 'top'; // top | articles | article
+
+// ─── INIT ─────────────────────────────────
+document.querySelector('.header-logo').textContent = SITE_NAME;
+document.querySelector('.hero-title').textContent = SITE_NAME;
+document.querySelector('.hero-desc').innerHTML = SITE_DESC;
+document.querySelector('.hero-label').textContent = SITE_LABEL;
+document.querySelector('.site-footer').innerHTML = `© ${SITE_NAME}`;
+document.title = SITE_NAME;
+
+// ─── LINK CARD RENDERER ───────────────────
+const renderer = new marked.Renderer();
+const defaultCode = renderer.code.bind(renderer);
+renderer.code = function({ text, lang }) {
+  if (lang === 'linkcard') {
+    const props = {};
+    text.split('\n').forEach(line => {
+      const m = line.match(/^(\w+):\s*(.+)$/);
+      if (m) props[m[1]] = m[2].trim();
+    });
+    const url = props.url || '#';
+    const title = props.title || url;
+    const desc = props.description || '';
+    const image = props.image || '';
+    let domain = '';
+    try { domain = new URL(url).hostname; } catch(e) { domain = url; }
+    return `
+      <a class="link-card" href="${url}" target="_blank" rel="noopener noreferrer">
+        <div class="link-card-body">
+          <div class="link-card-title">${title}</div>
+          ${desc ? `<div class="link-card-desc">${desc}</div>` : ''}
+          <div class="link-card-url">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-.025 9.45a.75.75 0 01-1.06-1.06l-1.25 1.25a2 2 0 01-2.83-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25z"/></svg>
+            ${domain}
+          </div>
+        </div>
+        ${image ? `<img class="link-card-thumb" src="${image}" alt="" loading="lazy" onerror="this.style.display='none'">` : ''}
+      </a>`;
+  }
+  return defaultCode({ text, lang });
+};
+marked.setOptions({ renderer });
+
+async function init() {
+  try {
+    const res = await fetch('articles.json');
+    articles = await res.json();
+    articles.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  } catch(e) {
+    document.getElementById('latestGrid').innerHTML = '<div class="empty">articles.json が見つかりません</div>';
+    return;
+  }
+  buildHeaderNav();
+  buildTopPage();
+  handleHash();
+  window.addEventListener('hashchange', handleHash);
+}
+
+function buildHeaderNav() {
+  const nav = document.getElementById('headerNav');
+  const btn = (text, fn, id) => {
+    const b = document.createElement('button');
+    b.textContent = text;
+    b.onclick = fn;
+    if (id) b.dataset.nav = id;
+    return b;
+  };
+  nav.appendChild(btn('トップ', goTop, 'top'));
+  nav.appendChild(btn('記事一覧', () => goArticles(), 'articles'));
+}
+
+function updateHeaderActive(page) {
+  document.querySelectorAll('.header-links button').forEach(b => {
+    b.classList.toggle('active', b.dataset.nav === page);
+  });
+}
+
+// ─── ROUTING ──────────────────────────────
+function navigate(page) {
+  currentPage = page;
+  document.getElementById('topPage').style.display = page === 'top' ? '' : 'none';
+  document.getElementById('articlesPage').style.display = page === 'articles' ? '' : 'none';
+  document.getElementById('articlePage').style.display = page === 'article' ? '' : 'none';
+  updateHeaderActive(page);
+  window.scrollTo(0, 0);
+}
+
+function goTop() {
+  currentFilter = null;
+  location.hash = '';
+  navigate('top');
+}
+
+function goArticles(filter) {
+  currentFilter = filter || null;
+  if (!filter) location.hash = 'articles';
+  else if (filter.sub) location.hash = `articles/${filter.cat}/${filter.sub}`;
+  else location.hash = `articles/${filter.cat}`;
+  navigate('articles');
+  renderArticlesList();
+}
+
+function goArticle(file) {
+  location.hash = file;
+  navigate('article');
+  renderArticle(file);
+}
+
+function handleHash() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (!h) { navigate('top'); return; }
+  if (h === 'articles') { goArticles(); return; }
+  if (h.startsWith('articles/')) {
+    const parts = h.replace('articles/', '').split('/');
+    goArticles(parts[1] ? { cat: parts[0], sub: parts[1] } : { cat: parts[0] });
+    return;
+  }
+  if (h.endsWith('.md')) { goArticle(h); return; }
+  navigate('top');
+}
+
+// ─── TOP PAGE ─────────────────────────────
+function buildTopPage() {
+  // Latest 4
+  const grid = document.getElementById('latestGrid');
+  const latest = articles.slice(0, 4);
+  grid.innerHTML = latest.map(a => `
+    <div class="latest-card fade-in" onclick="goArticle('${a.file}')">
+      <div class="lc-cat">${catLabel(a)}</div>
+      <div class="lc-title">${a.title}</div>
+      ${a.excerpt ? `<div class="lc-excerpt">${a.excerpt}</div>` : ''}
+      <div class="lc-date">${a.date || ''}</div>
+    </div>
+  `).join('');
+
+  // Category blocks
+  const blocks = document.getElementById('catBlocks');
+  const catMap = {};
+  articles.forEach(a => {
+    if (!catMap[a.category]) catMap[a.category] = { subs: {}, count: 0 };
+    catMap[a.category].count++;
+    if (a.subcategory) {
+      if (!catMap[a.category].subs[a.subcategory]) catMap[a.category].subs[a.subcategory] = 0;
+      catMap[a.category].subs[a.subcategory]++;
+    }
+  });
+  blocks.innerHTML = Object.entries(catMap).map(([cat, data]) => `
+    <div class="cat-block" onclick="goArticles({cat:'${cat}'})">
+      <div class="cat-block-icon">${CATEGORY_ICONS[cat] || '◇'}</div>
+      <div class="cat-block-name">${CATEGORY_LABELS[cat] || cat}</div>
+      <div class="cat-block-count">${data.count} 記事</div>
+      <div class="cat-block-subs">
+        ${Object.keys(data.subs).map(s =>
+          `<span>${SUBCATEGORY_LABELS[s] || s}</span>`
+        ).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── ARTICLES PAGE ────────────────────────
+function renderArticlesList() {
+  // Tabs
+  const tabs = document.getElementById('filterTabs');
+  const cats = [...new Set(articles.map(a => a.category))];
+  const allSubs = {};
+  articles.forEach(a => { if (a.subcategory) allSubs[a.category + '/' + a.subcategory] = { cat: a.category, sub: a.subcategory }; });
+
+  tabs.innerHTML = '';
+  const mkTab = (label, filter) => {
+    const t = document.createElement('button');
+    t.className = 'filter-tab';
+    t.textContent = label;
+    if (
+      (!currentFilter && !filter) ||
+      (currentFilter && filter && currentFilter.cat === filter.cat && currentFilter.sub === filter.sub)
+    ) t.classList.add('active');
+    t.onclick = () => goArticles(filter);
+    return t;
+  };
+  tabs.appendChild(mkTab('すべて', null));
+  cats.forEach(c => {
+    tabs.appendChild(mkTab(CATEGORY_LABELS[c] || c, { cat: c }));
+    // Sub tabs
+    Object.values(allSubs).filter(s => s.cat === c).forEach(s => {
+      const t = mkTab('　' + (SUBCATEGORY_LABELS[s.sub] || s.sub), { cat: c, sub: s.sub });
+      t.style.fontSize = '11.5px';
+      tabs.appendChild(t);
+    });
+  });
+
+  // Filter
+  const filtered = articles.filter(a => {
+    if (!currentFilter) return true;
+    if (currentFilter.sub) return a.category === currentFilter.cat && a.subcategory === currentFilter.sub;
+    return a.category === currentFilter.cat;
+  });
+
+  let title = 'すべての記事';
+  if (currentFilter) {
+    title = CATEGORY_LABELS[currentFilter.cat] || currentFilter.cat;
+    if (currentFilter.sub) title += '  /  ' + (SUBCATEGORY_LABELS[currentFilter.sub] || currentFilter.sub);
+  }
+  document.getElementById('articlesTitle').textContent = title;
+  document.getElementById('articlesCount').textContent = `${filtered.length} 記事`;
+
+  const list = document.getElementById('articlesList');
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty">まだ記事がありません</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(a => {
+    const d = parseDate(a.date);
+    return `
+    <div class="article-item fade-in" onclick="goArticle('${a.file}')">
+      <div class="ai-date">
+        <span class="day">${d.day}</span>
+        <span class="month">${d.monthStr}</span>
+      </div>
+      <div class="ai-body">
+        <div class="ai-cat">${catLabel(a)}</div>
+        <div class="ai-title">${a.title}</div>
+        ${a.excerpt ? `<div class="ai-excerpt">${a.excerpt}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── ARTICLE VIEW ─────────────────────────
+async function renderArticle(file) {
+  const a = articles.find(x => x.file === file);
+  if (!a) return;
+
+  document.title = `${a.title} — ${SITE_NAME}`;
+
+  document.getElementById('articleTop').innerHTML = `
+    <button class="article-back" onclick="goArticles()">← 記事一覧にもどる</button>
+    <div class="at-cat">${catLabel(a)}</div>
+    <h1>${a.title}</h1>
+    <div class="at-date">${a.date || ''}</div>
+  `;
+
+  const content = document.getElementById('articleContent');
+  content.innerHTML = '<div class="empty">読み込み中...</div>';
+  try {
+    const res = await fetch(file);
+    const md = await res.text();
+    content.innerHTML = marked.parse(md);
+  } catch(e) {
+    content.innerHTML = '<div class="empty">記事の読み込みに失敗しました</div>';
+  }
+}
+
+// ─── HELPERS ──────────────────────────────
+function catLabel(a) {
+  let s = CATEGORY_LABELS[a.category] || a.category;
+  if (a.subcategory) s += ' / ' + (SUBCATEGORY_LABELS[a.subcategory] || a.subcategory);
+  return s;
+}
+
+function parseDate(str) {
+  if (!str) return { day: '', monthStr: '' };
+  const [y, m, d] = str.split('-');
+  const months = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return { day: parseInt(d, 10), monthStr: months[parseInt(m, 10)] || m };
+}
+
+// ─── START ────────────────────────────────
+init();
+</script>
+</body>
+</html>
