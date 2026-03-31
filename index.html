@@ -870,6 +870,8 @@ function updateHeaderActive(page) {
 }
 
 // ─── ROUTING ──────────────────────────────
+let navigating = false;
+
 function navigate(page) {
   currentPage = page;
   document.getElementById('topPage').style.display = page === 'top' ? 'block' : 'none';
@@ -880,36 +882,43 @@ function navigate(page) {
 }
 
 function goTop() {
+  navigating = true;
   currentFilter = null;
   location.hash = '';
   navigate('top');
+  navigating = false;
 }
 
 function goArticles(filter) {
+  navigating = true;
   currentFilter = filter || null;
   if (!filter) location.hash = 'articles';
   else if (filter.sub) location.hash = `articles/${filter.cat}/${filter.sub}`;
   else location.hash = `articles/${filter.cat}`;
   navigate('articles');
   renderArticlesList();
+  navigating = false;
 }
 
 function goArticle(file) {
+  navigating = true;
   location.hash = file;
   navigate('article');
   renderArticle(file);
+  navigating = false;
 }
 
 function handleHash() {
+  if (navigating) return;
   const h = decodeURIComponent(location.hash.slice(1));
   if (!h) { navigate('top'); return; }
+  if (h.endsWith('.md')) { goArticle(h); return; }
   if (h === 'articles') { goArticles(); return; }
   if (h.startsWith('articles/')) {
     const parts = h.replace('articles/', '').split('/');
     goArticles(parts[1] ? { cat: parts[0], sub: parts[1] } : { cat: parts[0] });
     return;
   }
-  if (h.endsWith('.md')) { goArticle(h); return; }
   navigate('top');
 }
 
