@@ -769,15 +769,51 @@ renderer.code = function({ text, lang }) {
 };
 marked.setOptions({ renderer });
 
+// ─── DEMO DATA (fallback for preview) ─────
+const DEMO_ARTICLES = [
+  {
+    "title": "星降る夜の旅人",
+    "file": "articles/novel/fantasy/star-traveler.md",
+    "category": "novel",
+    "subcategory": "fantasy",
+    "date": "2026-03-30",
+    "excerpt": "銀色の砂漠を歩く旅人は、夜空から降ってくる星のかけらを拾い集めていた。"
+  },
+  {
+    "title": "最終軌道のコーヒー",
+    "file": "articles/novel/sf/last-orbit-coffee.md",
+    "category": "novel",
+    "subcategory": "sf",
+    "date": "2026-03-28",
+    "excerpt": "宇宙ステーション「ひかり」の食堂で、最後の一杯のコーヒーが淹れられた。"
+  },
+  {
+    "title": "はじめまして",
+    "file": "articles/blog/daily/hello.md",
+    "category": "blog",
+    "subcategory": "daily",
+    "date": "2026-03-31",
+    "excerpt": "このサイトを始めた経緯と、これからやりたいことについて。"
+  },
+  {
+    "title": "GitHub Pagesでサイトを作った話",
+    "file": "articles/blog/tech/setup-guide.md",
+    "category": "blog",
+    "subcategory": "tech",
+    "date": "2026-03-29",
+    "excerpt": "プログラミング知識ゼロでも、このサイトの仕組みなら記事を書けます。"
+  }
+];
+
 async function init() {
   try {
     const res = await fetch('articles.json');
+    if (!res.ok) throw new Error(res.status);
     articles = await res.json();
-    articles.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   } catch(e) {
-    document.getElementById('latestGrid').innerHTML = '<div class="empty">articles.json が見つかりません</div>';
-    return;
+    articles = DEMO_ARTICLES;
   }
+  articles.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   buildHeaderNav();
   buildTopPage();
   handleHash();
@@ -972,10 +1008,13 @@ async function renderArticle(file) {
   content.innerHTML = '<div class="empty">読み込み中...</div>';
   try {
     const res = await fetch(file);
+    if (!res.ok) throw new Error(res.status);
     const md = await res.text();
     content.innerHTML = marked.parse(md);
   } catch(e) {
-    content.innerHTML = '<div class="empty">記事の読み込みに失敗しました</div>';
+    // Show excerpt as fallback when .md file can't be loaded
+    const fallbackMd = `# ${a.title}\n\n${a.excerpt || ''}\n\n---\n\n*（プレビュー表示です。デプロイ後は記事全文が表示されます。）*`;
+    content.innerHTML = marked.parse(fallbackMd);
   }
 }
 
