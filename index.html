@@ -4,11 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>My Writing Room</title>
-<script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@400;700&family=Noto+Sans+JP:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ── Reset: neutralize external bare-element CSS (h1{}, p{}, etc.) ── */
+.hero-title, .hero-desc, .hero-label,
+.section-title, .section-more,
+.lc-title, .lc-excerpt, .lc-date,
+.ai-title, .ai-excerpt, .ai-cat,
+.cat-block-name, .cat-block-count,
+.articles-title, .articles-count,
+.article-top h1, .article-top .at-cat, .article-top .at-date,
+.article-content h2, .article-content h3, .article-content p,
+.article-content blockquote, .article-content ul, .article-content li,
+.link-card-title, .link-card-desc, .link-card-url {
+  width: auto;
+  position: static;
+  left: auto;
+  float: none;
+  text-shadow: none;
+}
 
 :root {
   --bg: #F7F8FA;
@@ -854,9 +872,9 @@ function updateHeaderActive(page) {
 // ─── ROUTING ──────────────────────────────
 function navigate(page) {
   currentPage = page;
-  document.getElementById('topPage').style.display = page === 'top' ? '' : 'none';
-  document.getElementById('articlesPage').style.display = page === 'articles' ? '' : 'none';
-  document.getElementById('articlePage').style.display = page === 'article' ? '' : 'none';
+  document.getElementById('topPage').style.display = page === 'top' ? 'block' : 'none';
+  document.getElementById('articlesPage').style.display = page === 'articles' ? 'block' : 'none';
+  document.getElementById('articlePage').style.display = page === 'article' ? 'block' : 'none';
   updateHeaderActive(page);
   window.scrollTo(0, 0);
 }
