@@ -72,6 +72,38 @@ image: https://example.com/ogp-image.jpg
 1. `articles/` に新しいフォルダを作る（例：`articles/essay/review/`）
 2. `index.html` の上部にある `CATEGORY_LABELS` と `SUBCATEGORY_LABELS` に表示名を追加：
 
+## 📄 一覧に載せないページを作る（About等）
+
+`articles.json` に `"hidden": true` を付けると、一覧・トップに表示されなくなります。
+URLで直接アクセスするか、ヘッダーにリンクを置いて使います。
+
+### ステップ1：Markdownファイルを作る
+
+`pages/` フォルダなどに `.md` ファイルを置きます（場所は自由）。
+
+### ステップ2：articles.json に追加する
+
+```json
+{
+  "title": "About",
+  "file": "pages/about.md",
+  "hidden": true
+}
+```
+
+`category`、`subcategory`、`date`、`excerpt` は省略OKです。
+
+### ステップ3：ヘッダーにリンクを追加する（任意）
+
+`index.html` の `HEADER_PAGES` にリンクを追加できます：
+
+```javascript
+const HEADER_PAGES = [
+  { label: 'About', file: 'pages/about.md' },
+  { label: 'お問い合わせ', file: 'pages/contact.md' },
+];
+```
+
 ```javascript
 const CATEGORY_LABELS = {
   'novel':  '小説',
@@ -105,6 +137,7 @@ const SITE_NAME = 'あなたのサイト名';
 │   └── blog/
 │       ├── daily/
 │       └── tech/
+├── pages/            ← 固定ページ置き場（About等）
 ├── images/           ← 画像置き場
 └── README.md         ← このファイル
 ```

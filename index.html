@@ -741,10 +741,19 @@ const CATEGORY_ICONS = {
   'blog':  '◎',
 };
 
+// ── ヘッダーに表示する固定ページ（hidden記事へのリンク等）──
+// { label: '表示名', file: 'articles.jsonのfileパス' }
+const HEADER_PAGES = [
+  { label: 'About', file: 'pages/about.md' },
+];
+
 // ─── STATE ────────────────────────────────
 let articles = [];
 let currentFilter = null;
 let currentPage = 'top'; // top | articles | article
+
+// 一覧に表示する記事（hidden: true を除外）
+function visibleArticles() { return articles.filter(a => !a.hidden); }
 
 // ─── INIT ─────────────────────────────────
 document.querySelector('.header-logo').textContent = SITE_NAME;
@@ -832,6 +841,11 @@ const DEMO_ARTICLES = [
     "subcategory": "tech",
     "date": "2026-03-29",
     "excerpt": "プログラミング知識ゼロでも、このサイトの仕組みなら記事を書けます。"
+  },
+  {
+    "title": "About",
+    "file": "pages/about.md",
+    "hidden": true
   }
 ];
 
@@ -861,6 +875,9 @@ function buildHeaderNav() {
   };
   nav.appendChild(btn('トップ', goTop, 'top'));
   nav.appendChild(btn('記事一覧', () => goArticles(), 'articles'));
+  HEADER_PAGES.forEach(p => {
+    nav.appendChild(btn(p.label, () => goArticle(p.file), 'page:' + p.file));
+  });
 }
 
 function updateHeaderActive(page) {
@@ -926,7 +943,7 @@ function handleHash() {
 function buildTopPage() {
   // Latest 4
   const grid = document.getElementById('latestGrid');
-  const latest = articles.slice(0, 4);
+  const latest = visibleArticles().slice(0, 4);
   grid.innerHTML = latest.map(a => `
     <div class="latest-card fade-in" onclick="goArticle('${a.file}')">
       <div class="lc-cat">${catLabel(a)}</div>
@@ -939,7 +956,7 @@ function buildTopPage() {
   // Category blocks
   const blocks = document.getElementById('catBlocks');
   const catMap = {};
-  articles.forEach(a => {
+  visibleArticles().forEach(a => {
     if (!catMap[a.category]) catMap[a.category] = { subs: {}, count: 0 };
     catMap[a.category].count++;
     if (a.subcategory) {
@@ -965,9 +982,10 @@ function buildTopPage() {
 function renderArticlesList() {
   // Tabs
   const tabs = document.getElementById('filterTabs');
-  const cats = [...new Set(articles.map(a => a.category))];
+  const visible = visibleArticles();
+  const cats = [...new Set(visible.map(a => a.category))];
   const allSubs = {};
-  articles.forEach(a => { if (a.subcategory) allSubs[a.category + '/' + a.subcategory] = { cat: a.category, sub: a.subcategory }; });
+  visible.forEach(a => { if (a.subcategory) allSubs[a.category + '/' + a.subcategory] = { cat: a.category, sub: a.subcategory }; });
 
   tabs.innerHTML = '';
   const mkTab = (label, filter) => {
@@ -993,7 +1011,7 @@ function renderArticlesList() {
   });
 
   // Filter
-  const filtered = articles.filter(a => {
+  const filtered = visible.filter(a => {
     if (!currentFilter) return true;
     if (currentFilter.sub) return a.category === currentFilter.cat && a.subcategory === currentFilter.sub;
     return a.category === currentFilter.cat;
@@ -1032,15 +1050,20 @@ function renderArticlesList() {
 // ─── ARTICLE VIEW ─────────────────────────
 async function renderArticle(file) {
   const a = articles.find(x => x.file === file);
-  if (!a) return;
 
-  document.title = `${a.title} — ${SITE_NAME}`;
+  // For hidden pages or standalone .md files not in articles.json
+  const title = a ? a.title : '';
+  const isHidden = !a || a.hidden;
+  const backLabel = isHidden ? '← トップにもどる' : '← 記事一覧にもどる';
+  const backFn = isHidden ? 'goTop()' : 'goArticles()';
+
+  document.title = title ? `${title} — ${SITE_NAME}` : SITE_NAME;
 
   document.getElementById('articleTop').innerHTML = `
-    <button class="article-back" onclick="goArticles()">← 記事一覧にもどる</button>
-    <div class="at-cat">${catLabel(a)}</div>
-    <h1>${a.title}</h1>
-    <div class="at-date">${a.date || ''}</div>
+    <button class="article-back" onclick="${backFn}">${backLabel}</button>
+    ${a && a.category ? `<div class="at-cat">${catLabel(a)}</div>` : ''}
+    ${title ? `<h1>${title}</h1>` : ''}
+    ${a && a.date ? `<div class="at-date">${a.date}</div>` : ''}
   `;
 
   const content = document.getElementById('articleContent');
@@ -1051,7 +1074,9 @@ async function renderArticle(file) {
     const md = await res.text();
     content.innerHTML = parseMd(md);
   } catch(e) {
-    const fallbackMd = `# ${a.title}\n\n${a.excerpt || ''}\n\n---\n\n*（プレビュー表示です。デプロイ後は記事全文が表示されます。）*`;
+    const fallbackMd = title
+      ? `# ${title}\n\n${(a && a.excerpt) || ''}\n\n---\n\n*（プレビュー表示です。デプロイ後は全文が表示されます。）*`
+      : '*（ページの読み込みに失敗しました）*';
     content.innerHTML = parseMd(fallbackMd);
   }
 }
